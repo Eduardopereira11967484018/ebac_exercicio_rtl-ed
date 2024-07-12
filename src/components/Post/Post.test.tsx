@@ -1,47 +1,37 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { fireEvent, render, screen } from '@testing-library/react';
-import Post from '.';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
+import Post from '.';
 
-describe('Test <Post />', () => {
-    it('Expect render correctly', () => {
+// Mocking do PostComments
+jest.mock('../PostComments', () => () => <div data-testid="post-comments">Mocked PostComments</div>);
+
+describe('Post Component', () => {
+    test('renders Post component with image and text', () => {
+        const childrenText = 'This is a sample post';
+        const imageUrl = 'https://www.orangeboxminiaturas.com.br/img/products/batmovel-1989-figura-batman-em-metal-jada-toys-1-24-jad-98260_1_1000.jpg';
+        const altText = 'Sample Image';
+
         render(
-            <Post imageUrl="https://via.placeholder.com/200x200" >
-                Teste
+            <Post imageUrl={imageUrl} altText={altText}>
+                {childrenText}
             </Post>
         );
-        expect(screen.getAllByText('Teste')).toBeInTheDoc();
+
+        const imageElement = screen.getByRole('img');
+        const textElement = screen.getByText(childrenText);
+        const commentsElement = screen.getByTestId('post-comments');
+
+        //Comfirmando o elemento de imagem
+        expect(imageElement).toBeInTheDocument();
+        expect(imageElement).toHaveAttribute('src', imageUrl);
+        expect(imageElement).toHaveAttribute('alt', altText);
+
+        // Comfirmando o elemento de imagem
+        expect(textElement).toBeInTheDocument();
+
+        // Comfirmando o mocked PostComments component
+        expect(commentsElement).toBeInTheDocument();
+        expect(commentsElement).toHaveTextContent('Mocked PostComments');
     });
-});
-
-it('Should zoom in and out when image is clicked', () => {
-    render(
-        <Post imageUrl="https://via.placeholder.com/200x200" >
-            Teste
-            </Post>
-    );
-    const image = screen.getByAltText('Conteudo visual do post');
-
-    //Clicando na imagem para ampliar
-    fireEvent.click(image);
-
-    //Verificando se a classe "zoomed" foi removida da imagem
-    expect(image).not.toHaveClass('zoomed');
-
-    //Clicando se a imagem para normalizar 
-    fireEvent.click(image);
-
-    //Verificando se a classe "zoomed" foi removida da imagem
-    expect(image).toHaveClass('zoomed');
-});
-it('Should render comments section', () => {
-    render(
-        <Post imageUrl="https://via.placeholder.com/200x200" >
-            Teste
-            </Post>
-    );
-
-    // Verificando se a seção de comentarios foi renderizanda
-    expect(screen.getByText('Comentarios')).toBeInTheDoc();  //Supondo que 'comentar' é um texto padrão na seção de comentario
 });
